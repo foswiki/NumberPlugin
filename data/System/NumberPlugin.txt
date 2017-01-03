@@ -20,10 +20,10 @@ For example, a number such as =1234= is formatted differently depending on the l
 |        |  | =ar= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="ar"}%" else="&#1633;&#1644;&#1634;&#1635;&#1636;"}% |
 |        |  | =es= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="es"}%" else="1234"}% |
 | =1234.00= | currency | =en_US= | currency_code="USD" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="en_US" type="currency" currency_code="USD"}%" else="$1,234.00"}% |
-|           | currency | =de_DE= | currency_code="EUR" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="de_DE" type="currency" currency_code="EUR"}%" else="1.234,00 €"}% |
+|           | currency | =de_DE= | currency_code="EUR" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="de_DE" type="currency" currency_code="EUR"}%" else="1.234,00 &#8364;"}% |
 |           | currency | =ar= | currency_code="AED" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="ar" type="currency" currency_code="AED"}%" else="&#1583;.&#1573;.&#8207; &#1633;&#1644;&#1634;&#1635;&#1636;&#1643;&#1632;&#1632;"}% |
 |           | currency | =ar= | currency_code="USD" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="ar" type="currency" currency_code="USD"}%" else="US$ &#1633;&#1644;&#1634;&#1635;&#1636;&#1643;&#1632;&#1632;"}% |
-|           | currency | =es= | currency_code="EUR" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="es" type="currency" currency_code="EUR"}%" else="1234,00 €"}% |
+|           | currency | =es= | currency_code="EUR" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="es" type="currency" currency_code="EUR"}%" else="1234,00 &#8364;"}% |
 | =0.1234= | percent | =en_US= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="en_US" type="percent"}%" else="12%"}% |
 |        |  | =de_DE= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="de_DE" type="percent"}%" else="12 %"}% |
 |        |  | =ar= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="ar" type="percent"}%" else="&#1633;&#1634;&#1642;"}% |
