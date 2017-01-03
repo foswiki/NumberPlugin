@@ -1,0 +1,113 @@
+%META:TOPICINFO{author="ProjectContributor" comment="reprev" date="1483463701" format="1.1" reprev="1" version="1"}%
+---+!! %TOPIC%
+%FORMFIELD{"Description"}%
+
+%TOC%
+
+This plugin allows to format 
+
+   * numbers,
+   * currencies and 
+   * percentages 
+
+in a localized way using the [[http://cldr.unicode.org/][Unicode CLDR]].
+
+For example, a number such as =1234= is formatted differently depending on the locales
+
+| *Number* | *Type* | *Locale* | *Parameter* | *Output* |
+| =1234.00= | number | =en_US= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="en_US"}%" else="1,234"}% |
+|        |  | =de_DE= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="de_DE"}%" else="1.234"}% |
+|        |  | =ar= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="ar"}%" else="&#1633;&#1644;&#1634;&#1635;&#1636;"}% |
+|        |  | =es= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="es"}%" else="1234"}% |
+| =1234.00= | currency | =en_US= | currency_code="USD" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="en_US" type="currency" currency_code="USD"}%" else="$1,234.00"}% |
+|           | currency | =de_DE= | currency_code="EUR" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="de_DE" type="currency" currency_code="EUR"}%" else="1.234,00 €"}% |
+|           | currency | =ar= | currency_code="AED" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="ar" type="currency" currency_code="AED"}%" else="&#1583;.&#1573;.&#8207; &#1633;&#1644;&#1634;&#1635;&#1636;&#1643;&#1632;&#1632;"}% |
+|           | currency | =ar= | currency_code="USD" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="ar" type="currency" currency_code="USD"}%" else="US$ &#1633;&#1644;&#1634;&#1635;&#1636;&#1643;&#1632;&#1632;"}% |
+|           | currency | =es= | currency_code="EUR" | %IF{"context NumberPluginEnabled" then="%NUMBER{"1234.00" locale="es" type="currency" currency_code="EUR"}%" else="1234,00 €"}% |
+| =0.1234= | percent | =en_US= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="en_US" type="percent"}%" else="12%"}% |
+|        |  | =de_DE= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="de_DE" type="percent"}%" else="12 %"}% |
+|        |  | =ar= | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="ar" type="percent"}%" else="&#1633;&#1634;&#1642;"}% |
+|        |  | =es=  | | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="es" type="percent"}%" else="12 %"}% |
+|        |  | =en_US= | minimum_fraction_digits="1" | %IF{"context NumberPluginEnabled" then="%NUMBER{"0.1234" locale="en_US" type="percent" minimum_fraction_digits="1" }%" else="12.3%"}% |
+
+---++ Syntax
+
+By default, numbers are formatted by the =%<nop>NUMBER{"value" param="..."}%= macro
+
+| *Parameter* | *Description* | *Default* |
+| =type= | specifies what kind of number this is and will use the related formatter for it, can be =number=, =currency= or =percent= | =number= |
+| =locale= | unicode locale identifiers, for example =es= (Spanish), =es_ES= (European Spanish), =es_419= (Latin American Spanish), =zh_Hant= (Traditional Chinese), =zh_Hans= (Simplified Chinese), =chr= (Cherokee) | current locale of the user's session |
+| =decimal_sign= | delimiter of fraction | see current locale |
+| =group_sign= | delimiter every three digits in large numbers | see current locale |
+| =plus_sign= | example =+= | see current locale |
+| =minus_sign= | =-= | see current locale |
+| =infinity= | =&#8734;= | see current locale |
+| =nan= | =NaN= | see current locale |
+| =pattern= | pattern how to format a number, for example =#,##0.###= | see current locale |
+| =minimum_integer_digits= | | see current locale |
+| =minimum_fraction_digits= | | |
+| =maximum_fraction_digits= | | |
+| =primary_grouping_size= | | |
+| =secondary_grouping_size= | | |
+| =minimum_grouping_digits= | | |
+| =rounding_increment= | | |
+| <b>Parameters for currency:</b> |||
+| =currency_code= | this parameter is required when the =type= is set to =currency=; possible values are any 3-letter digits according to [[https://en.wikipedia.org/wiki/ISO_4217#Active_codes][ISO 4217]], such as =EUR= or =USD= | |
+| =currency_sign= | the sign that is used to identify the currency | see current locale |
+| =cash= | for boolean switch to enable rendering of cache which may be formatted differently for some locales | 0 |
+| <b>Parameters for percent:</b> |||
+| =permil= | | 0 |
+| =percent_sign= | | % |
+| =permil_sign= | | &#8240; |
+
+Further documentation is available at [[https://metacpan.org/pod/CLDR::Number][CLDR::Number]], the perl library being used underneath.
+
+In addition to the =%NUMBER= macro you may specify a list of currency codes as a shortcut for the given type of number. The configuration setting stored in =$Foswiki::cfg{NumberPlugin}{Currencies}= will specify the list of those
+which a macro should be created for. For example a setting such as
+
+<verbatim>
+$Foswiki::cfg{NumberPlugin}{Currencies} = "EUR, USD";
+</verbatim>
+
+will create the macros =%<nop>EUR{...}%= and =%<nop>USD{...}%= as a shortcut for
+
+<verbatim class="tml">
+%NUMBER{"..." type="currency" currency_code="<code>"}%
+</verbatim>
+
+---++ Formfield types
+
+This plugin defines three additional formfield types that may be used defining [[%SYSTEMWEB%.DataForms][DataForms]]. 
+
+   * =currency=
+   * =number= 
+   * =percent=
+
+Parameters are specified in the =Values= column of the formfield, i.e. =currency= _requires_ a =currency_code= parameter such as in:
+
+<verbatim>
+| *Name*           | *Type*   | *Size* | *Values*            | *Description* | *Attributes* | *Default* |
+| Advance Payments | currency | 30     | currency_code="eur" |               |              | 0         |
+</verbatim>
+
+---++ Installation Instructions
+%$INSTALL_INSTRUCTIONS%
+
+---++ Dependencies
+%$DEPENDENCIES%
+
+---++ Change History
+
+%TABLE{columnwidths="7em" tablewidth="100%"}%
+| 03 Jan 2017 | initial release |
+
+%META:FORM{name="PackageForm"}%
+%META:FIELD{name="Author" title="Author" value="Michael Daum"}%
+%META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%
+%META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
+%META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
+%META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
+%META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
+%META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

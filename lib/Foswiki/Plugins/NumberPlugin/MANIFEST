@@ -1,0 +1,8 @@
+data/System/NumberPlugin.txt 0644
+lib/Foswiki/Form/Currency.pm 0644
+lib/Foswiki/Form/Number.pm 0644
+lib/Foswiki/Form/Percent.pm 0644
+lib/Foswiki/Plugins/NumberPlugin/Config.spec 0644
+lib/Foswiki/Plugins/NumberPlugin/Core.pm 0644
+lib/Foswiki/Plugins/NumberPlugin/DEPENDENCIES 0644
+lib/Foswiki/Plugins/NumberPlugin.pm 0644

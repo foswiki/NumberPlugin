@@ -1,0 +1,10 @@
+*,v
+igp_*
+*.swp
+NumberPlugin.md5
+NumberPlugin.sha1
+NumberPlugin.tgz
+NumberPlugin.txt
+NumberPlugin.zip
+NumberPlugin_installer
+NumberPlugin_installer.pl
