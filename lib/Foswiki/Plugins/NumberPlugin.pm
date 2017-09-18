@@ -20,25 +20,37 @@ use warnings;
 
 use Foswiki::Func ();
 
-our $VERSION = '1.00';
-our $RELEASE = '03 Jan 2017';
-our $SHORTDESCRIPTION = 'Localized Number Formatter';
+our $VERSION = '2.00';
+our $RELEASE = '18 Sep 2017';
+our $SHORTDESCRIPTION = 'Localized Number Formatter and Currency Converter';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
 
 sub initPlugin {
 
   Foswiki::Func::registerTagHandler('NUMBER', sub { return getCore()->handleNUMBER(@_); });
+  Foswiki::Func::registerTagHandler('CURRENCIES', sub { return getCore()->handleCURRENCIES(@_); });
 
-  if ($Foswiki::cfg{NumberPlugin}{Currencies}) {
-    foreach my $code (split(/\s*,\s*/, $Foswiki::cfg{NumberPlugin}{Currencies})) {
-      Foswiki::Func::registerTagHandler($code, sub {
-        my ($session, $params) = @_;
-        $params->{currency_code} = $code;
-        return getCore()->handleCurrency($params); 
-      });
-    }
+  foreach my $code (getCore()->getCurrencies) {
+    next if $code eq "TOP"; # breaks some wiki apps
+    Foswiki::Func::registerTagHandler($code, sub {
+      my ($session, $params) = @_;
+      $params->{currency_code} = $code;
+      return getCore()->handleCurrency($params); 
+    });
   }
+
+  Foswiki::Func::registerRESTHandler('purgeCache', sub { return getCore()->purgeCache(@_); },
+    authenticate => 0,
+    validate => 0,
+    http_allow => 'GET,POST',
+  );
+
+  Foswiki::Func::registerRESTHandler('clearCache', sub { return getCore()->clearCache(@_); },
+    authenticate => 0,
+    validate => 0,
+    http_allow => 'GET,POST',
+  );
 
   return 1;
 }

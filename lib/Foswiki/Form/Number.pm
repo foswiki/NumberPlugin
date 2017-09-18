@@ -74,7 +74,7 @@ sub getDisplayValue {
     $result =~ s/^\s+|\s+$//g;
   };
 
-  return $result;
+  return "<span class='foswikiNumber foswikiHidden'>$value</span>".$result;
 }
 
 sub renderForDisplay {
