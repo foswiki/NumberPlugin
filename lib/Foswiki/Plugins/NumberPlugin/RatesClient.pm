@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2018 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -37,6 +37,14 @@ sub new {
   $this->{provider} = $Foswiki::cfg{NumberPlugin}{RatesProvider} || 'https://api.fixer.io';
   $this->{apiUrl} = $Foswiki::cfg{NumberPlugin}{$this->{provider}}{Url} || '';
   $this->{apiParams} = $Foswiki::cfg{NumberPlugin}{$this->{provider}}{Params} || {};
+  $this->{timeout} = $Foswiki::cfg{NumberPlugin}{Timeout};
+  $this->{timeout} = 5 unless defined $this->{timeout};
+
+  $this->setTimeout($this->{timeout});
+
+  if ($Foswiki::cfg{PROXY}{HOST}) {
+    $this->getUseragent->proxy(['http','https'], $Foswiki::cfg{PROXY}{HOST});
+  }
 
   return $this;
 }
@@ -47,9 +55,32 @@ sub getExchange {
   unless (defined $this->{_exchange}) {
     my $uri = new URI($this->{apiUrl});
     $uri->query_form($this->{apiParams});
-    $this->{_exchange} = $this->get($uri);
+
+    my $data = $this->get($uri);
+
+    if ($this->{provider} eq 'CurrencyLayer') {
+      $this->_getExchangeFromCurrencyLayer($data);
+    } else {
+      $this->{_exchange} = $data;
+    }
+
+    # make sure the base is in
     $this->{_exchange}{rates}{$this->{_exchange}{base}} = 1
-      if defined $this->{_exchange}{base}; # make sure the base is in
+      if defined $this->{_exchange}{base}; 
+  }
+
+  return $this->{_exchange};
+}
+
+sub _getExchangeFromCurrencyLayer {
+  my ($this, $data) = @_;
+
+  $this->{_exchange} = ();
+  $this->{_exchange}{base} = $data->{source};
+  foreach my $key (keys %{$data->{quotes}}) {
+    my $val = $data->{quotes}{$key};
+    $key=~ s/^$this->{_exchange}{base}//;
+    $this->{_exchange}{rates}{$key} = $val;
   }
 
   return $this->{_exchange};

@@ -16,8 +16,9 @@ It also allows to convert currencies using an online exchange rates service. Sup
 
    * [[http://fixer.io/][Fixer.IO]]
    * [[https://openexchangerates.org/][Open Exchange Rates]]
+   * [[https://currencylayer.com/][CurrencyLayer]]
 
-Both of these services require an API key/id to be downloaded by registering for an appropriate service level. Up-to-date exchange rates will then be
+All of these services require an API key/id to be downloaded by registering for an appropriate service level. Up-to-date exchange rates will then be
 downloaded and cached for a specific time, e.g. refreshing rates once a day.
 
 ---++ Usage
@@ -97,7 +98,7 @@ This macro lists all available currencies as well as their exchange rate using a
 | =base= | base currency to with all rates are calculated | base rate of the currency provider |
 | =header= | format string preceeding the output list |  |
 | =footer= | format string appended to the output list |  |
-| =separator= | list separator | =, = |
+| =separator= | list separator | , |
 | =format= | format string used for every item in the list of available currencies | =$code= |
 | =include= | regular expression that a currency code must match to be included in the output | |
 | =exclude= | regular expression that a currency code must _not_ match to be included in the output | |
@@ -132,6 +133,7 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  05 Mar 2018 | added support for <nop>CurrencyLayer | 
 |  18 Sep 2017 | added support for exchange rates; made compatible with <nop>SpreadsheetPlugin |
 |  03 Jan 2017 | initial release |
 
@@ -141,7 +143,7 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2018 Michael Daum http://michaeldaumconsulting.com"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%
