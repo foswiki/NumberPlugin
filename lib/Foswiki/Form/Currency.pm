@@ -20,6 +20,8 @@ sub new {
 sub formatter {
   my ($this) = @_;
 
+  # TODO: provide currecny_code in another formfield
+
   unless (defined $this->{_formatter}) {
     $this->{_formatter} = Foswiki::Plugins::NumberPlugin::getCore()->currencyFormatter(%{$this->param()});
   }

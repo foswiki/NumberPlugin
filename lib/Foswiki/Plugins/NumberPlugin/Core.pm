@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017-2018 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,13 +19,13 @@ use strict;
 use warnings;
 use CLDR::Number ();
 use Error qw(:try);
+use Scalar::Util qw( looks_like_number );
 
 use Foswiki::Func ();
 use Foswiki::Plugins ();
 
 use constant TRACE => 0; # toggle me
-
-our $EXCHANGE; # in-memory cache
+our @BYTE_SUFFIX = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB');
 
 sub new {
   my $class = shift;
@@ -36,12 +36,6 @@ sub new {
 
   $this->{_client} = undef;
 
-  unless (defined $EXCHANGE) {
-    #print STDERR "... reading exchange rates into memory\n";
-    $EXCHANGE = $this->client->getExchange();
-  } else {
-    #print STDERR "... alread have exchange rates in memory\n";
-  }
 
   return $this;
 }
@@ -86,6 +80,32 @@ sub percentFormatter {
   return $this->cldr($locale)->percent_formatter(%params);
 }
 
+sub formatBytes {
+  my ($this, $value, $params) = @_;
+
+  return $value unless looks_like_number($value);
+  my $max = $params->{"max"} || '';
+
+  my $magnitude = 0;
+  my $suffix;
+
+  while ($magnitude < scalar(@BYTE_SUFFIX)) {
+    $suffix = $BYTE_SUFFIX[$magnitude];
+    last if $value < 1024;
+    last if $max eq $suffix;
+    $value = $value/1024;
+    $magnitude++;
+  };
+
+  my $prec = $params->{"prec"} // 2;
+
+  my $result = sprintf("%.0".$prec."f", $value);
+  $result =~ s/\.00$//;
+  $result .= ' '. $suffix;
+
+  return $result;
+}
+
 sub handleNUMBER {
   my ($this, $session, $params, $topic, $web) = @_;
 
@@ -97,14 +117,18 @@ sub handleNUMBER {
   my $result;
  
   try {
-    if ($theType eq 'decimal' or $theType eq 'number') {
+    if ($theType eq 'bytes') {
+      $result = $this->formatBytes($theNumber, $params);
+    } elsif ($theType eq 'decimal' or $theType eq 'number') {
       $formatter = $this->decimalFormatter(%$params);
+      throw Error::Simple("can't create formatter") unless defined $formatter;
     } elsif ($theType eq 'currency') {
 
       my $targetCurrency = $params->{currency_code} // $params->{currency} // $params->{to}; 
       $params->{currency_code} = $targetCurrency if defined $targetCurrency;
 
       $formatter = $this->currencyFormatter(%$params);
+      throw Error::Simple("can't create formatter") unless defined $formatter;
 
       my $sourceCurrency =  $params->{from};
       if (defined $sourceCurrency && $sourceCurrency ne $targetCurrency) {
@@ -113,12 +137,11 @@ sub handleNUMBER {
 
     } elsif ($theType eq 'percent') {
       $formatter = $this->percentFormatter(%$params);
+      throw Error::Simple("can't create formatter") unless defined $formatter;
     } else {
       throw Error::Simple("unknown number type");
     }
-    throw Error::Simple("can't create formatter") unless defined $formatter;
-    $result = $formatter->format($theNumber);
-
+    $result = $formatter->format($theNumber) if defined $formatter;
     $result = _cloakNumber($theNumber, $result);
 
   } catch Error::Simple with {
@@ -141,7 +164,7 @@ sub handleCURRENCIES {
 
   my $include = $params->{include};
   my $exclude = $params->{exclude};
-  my $baseCurrency = $params->{base} // $EXCHANGE->{base};
+  my $baseCurrency = $params->{base} // $this->client->getExchange->{base};
   my $total = $params->{_DEFAULT} // $params->{total} // 1;
 
   my @results =();
@@ -167,6 +190,7 @@ sub handleCurrency {
   my $theNumber = $params->{_DEFAULT} || 0;
   my $formatter;
   my $result;
+  my $error;
 
   try {
     my $targetCurrency = $params->{currency_code} // $params->{currency} // $params->{to}; 
@@ -182,13 +206,16 @@ sub handleCurrency {
 
     $result = $formatter->format($theNumber);
   } catch Error::Simple with {
-    $result = shift;
-    $result =~ s/ at \/.*$//;
-    $result =~ s/^\s+|\s+$//g;
-    $result = _inlineError($result);
+    $error = shift;
+    $error =~ s/ at \/.*$//;
+    $error =~ s/^\s+|\s+$//g;
+    $error = _inlineError($error);
   };
+  return $error if defined $error;
 
-  return _cloakNumber($theNumber, $result);
+  $result = _cloakNumber($theNumber, $result) if Foswiki::Func::isTrue($params->{cloak}, 1);
+
+  return $result;
 }
 
 # make it work with SpreadSheetPlugin
@@ -223,19 +250,19 @@ sub convertCurrency {
 sub getCurrencies {
   my $this = shift;
 
-  return keys %{$EXCHANGE->{rates}};
+  return keys %{$this->client->getExchange->{rates}};
 }
 
 sub getRate {
   my ($this, $from, $to) = @_;
 
   throw Error::Simple("unsupported rate '$from'") 
-    unless defined $EXCHANGE->{rates}{$from};
+    unless defined $this->client->getExchange->{rates}{$from};
 
   throw Error::Simple("unsupported rate '$to'") 
-    unless defined $EXCHANGE->{rates}{$to};
+    unless defined $this->client->getExchange->{rates}{$to};
 
-  return $EXCHANGE->{rates}{$to} / $EXCHANGE->{rates}{$from};
+  return $this->client->getExchange->{rates}{$to} / $this->client->getExchange->{rates}{$from};
 }
 
 sub client {
@@ -251,20 +278,6 @@ sub client {
   }
 
   return $this->{_client};
-}
-
-sub purgeCache {
-  my $this = shift;
-
-  $EXCHANGE = undef;
-  $this->client->purgeCache;
-}
-
-sub clearCache {
-  my $this = shift;
-
-  $EXCHANGE = undef;
-  $this->client->clearCache;
 }
 
 1;

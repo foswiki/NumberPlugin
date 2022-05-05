@@ -68,6 +68,7 @@ sub getDisplayValue {
   my $result;
   try {
     $result = $this->formatter->format($value);
+    $result =~ s/([,.])/'&#'.ord($1).';'/ge; # encode the display value not to disturbe CALC otherwise
   } catch Error::Simple with {
     $result = shift;
     $result =~ s/ at \/.*$//;
@@ -107,7 +108,7 @@ sub renderForEdit {
 __END__
 Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 
-Copyright (C) 2017-2018 Foswiki Contributors. Foswiki Contributors
+Copyright (C) 2017-2021 Foswiki Contributors. Foswiki Contributors
 are listed in the AUTHORS file in the root of this distribution.
 NOTE: Please extend that file, not this notice.
 

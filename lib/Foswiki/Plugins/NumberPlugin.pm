@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017-2018 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,9 +19,10 @@ use strict;
 use warnings;
 
 use Foswiki::Func ();
+use Foswiki::Plugins::NumberPlugin::Core ();
 
-our $VERSION = '3.00';
-our $RELEASE = '05 Mar 2018';
+our $VERSION = '6.00';
+our $RELEASE = '05 May 2022';
 our $SHORTDESCRIPTION = 'Localized Number Formatter and Currency Converter';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
@@ -31,26 +32,13 @@ sub initPlugin {
   Foswiki::Func::registerTagHandler('NUMBER', sub { return getCore()->handleNUMBER(@_); });
   Foswiki::Func::registerTagHandler('CURRENCIES', sub { return getCore()->handleCURRENCIES(@_); });
 
-  foreach my $code (getCore()->getCurrencies) {
-    next if $code eq "TOP"; # breaks some wiki apps
+  foreach my $code (split/\s*,\s*/, $Foswiki::cfg{NumberPlugin}{Currencies} || '') {
     Foswiki::Func::registerTagHandler($code, sub {
       my ($session, $params) = @_;
       $params->{currency_code} = $code;
       return getCore()->handleCurrency($params); 
     });
   }
-
-  Foswiki::Func::registerRESTHandler('purgeCache', sub { return getCore()->purgeCache(@_); },
-    authenticate => 0,
-    validate => 0,
-    http_allow => 'GET,POST',
-  );
-
-  Foswiki::Func::registerRESTHandler('clearCache', sub { return getCore()->clearCache(@_); },
-    authenticate => 0,
-    validate => 0,
-    http_allow => 'GET,POST',
-  );
 
   return 1;
 }

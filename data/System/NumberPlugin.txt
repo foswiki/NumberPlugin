@@ -48,7 +48,7 @@ For example, a number such as =1234= is formatted differently depending on the l
 By default, numbers are formatted by the =%<nop>NUMBER{"value" param="..."}%= macro
 
 | *Parameter* | *Description* | *Default* |
-| =type= | specifies what kind of number this is and will use the related formatter for it, can be =number=, =currency= or =percent= | =number= |
+| =type= | specifies what kind of number this is and will use the related formatter for it, can be =number=, =currency=, =percent= or =bytes= | =number= |
 | =locale= | unicode locale identifiers, for example =es= (Spanish), =es_ES= (European Spanish), =es_419= (Latin American Spanish), =zh_Hant= (Traditional Chinese), =zh_Hans= (Simplified Chinese), =chr= (Cherokee) | current locale of the user's session |
 | =decimal_sign= | delimiter of fraction | see current locale |
 | =group_sign= | delimiter every three digits in large numbers | see current locale |
@@ -133,6 +133,11 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  05 May 2022 | reimplement caching using Foswiki:Extensions/CacheContrib; \
+                 default to no currency provider for exchange rates; \
+                 load currencies lazily for better init performace; \
+                 improved number format "bytes" |
+|  15 Mar 2021 | added back ={Currencies}= setting as documented |
 |  05 Mar 2018 | added support for <nop>CurrencyLayer | 
 |  18 Sep 2017 | added support for exchange rates; made compatible with <nop>SpreadsheetPlugin |
 |  03 Jan 2017 | initial release |
@@ -143,7 +148,7 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017-2018 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2022 Michael Daum"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%
