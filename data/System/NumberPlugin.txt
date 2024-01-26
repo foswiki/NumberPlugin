@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="" date="1505722717" format="1.1"  version="1"}%
+%META:TOPICINFO{author="micha" comment="" date="1701965631" format="1.1" version="9"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -124,6 +124,17 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 | Advance Payments | currency | 30     | currency="EUR" |               |              | 0         |
 </verbatim>
 
+Formfield types "number" and "percent" may specify additional parameters as in:
+
+<verbatim>
+| *Name*           | *Type*   | *Size* | *Values*            | *Description* | *Attributes* | *Default* |
+| Percentage | percent | 5 | fraction="2" placeholder="enter value" |               |              | 0         |
+| Some Number | number | 5 | fraction="2" placeholder="enter value" |               |              | 0         |
+</verbatim>
+
+There are additional parameters for a "number" as documented in  https://metacpan.org/pod/CLDR::Number::Format::Decimal 
+and in https://metacpan.org/pod/CLDR::Number::Format::Percent for "percent" formfields.
+
 ---++ Installation Instructions
 %$INSTALL_INSTRUCTIONS%
 
@@ -133,6 +144,8 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  26 Jan 2024 | add better support for fractions in numerical values; added placeholder parameter for input fields; use !JQIMaskContrib for masked input |
+|  20 Oct 2022 | improved caching of exchange rates |
 |  05 May 2022 | reimplement caching using Foswiki:Extensions/CacheContrib; \
                  default to no currency provider for exchange rates; \
                  load currencies lazily for better init performace; \
@@ -148,7 +161,7 @@ Parameters are specified in the =Values= column of the formfield, i.e. the formf
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017-2022 Michael Daum"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2024 Michael Daum"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

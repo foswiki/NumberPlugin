@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2024 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -37,13 +37,21 @@ sub new {
   $this->{provider} = $Foswiki::cfg{NumberPlugin}{RatesProvider} || 'none';
   $this->{apiUrl} = $Foswiki::cfg{NumberPlugin}{$this->{provider}}{Url} || '';
   $this->{apiParams} = $Foswiki::cfg{NumberPlugin}{$this->{provider}}{Params} || {};
-  $this->{timeout} = $Foswiki::cfg{NumberPlugin}{Timeout};
-  $this->{timeout} = 5 unless defined $this->{timeout};
+  $this->{timeout} = $Foswiki::cfg{NumberPlugin}{Timeout} // 5;
 
   $this->setTimeout($this->{timeout});
 
   if ($Foswiki::cfg{PROXY}{HOST}) {
     $this->getUseragent->proxy(['http','https'], $Foswiki::cfg{PROXY}{HOST});
+  }
+
+  my $request = Foswiki::Func::getRequestObject();
+  my $refresh = $request->param("refresh") || '';
+  $this->{doRefresh} = ($refresh =~ /^(exchangerates|rates)$/) ? 1:0;
+
+  if ($this->{doRefresh}) {
+    $request->delete("refresh");
+    _writeDebug("refreshing cache");
   }
 
   return $this;
@@ -52,7 +60,9 @@ sub new {
 sub getExchange {
   my $this = shift;
 
-  unless (%EXCHANGE) {
+  #_writeDebug("called getExchange ...".$this);
+
+  if (!%EXCHANGE || $this->{doRefresh}) {
 
     if ($this->{provider} eq 'none') {
       foreach my $code (split(/\s*,\s*/, $Foswiki::cfg{NumberPlugin}{Currencies} || '')) {
@@ -65,6 +75,12 @@ sub getExchange {
 
       my $data = $this->get($uri);
 
+      if($data->{error} && $this->{doRefresh}) {
+        _writeDebug("refreshing failed ... trying again with cached results");
+        $this->{doRefresh} = 0; # try again without refreshing
+        return $this->getExchange();
+      } 
+
       if ($this->{provider} eq 'CurrencyLayer') {
         $this->_getExchangeFromCurrencyLayer($data);
       } else {
@@ -76,6 +92,7 @@ sub getExchange {
     $EXCHANGE{rates}{$EXCHANGE{base}} = 1
       if defined $EXCHANGE{base}; 
   }
+  #_writeDebug("done getExchange");
 
   return \%EXCHANGE;
 }
@@ -107,36 +124,39 @@ sub json {
 sub get {
   my ($this, $uri) = @_;
 
-  my $cgiObj = Foswiki::Func::getRequestObject();
-  my $refresh = $cgiObj->param("refresh") || '';
-  $refresh = ($refresh =~ /^(exchangerates|on)$/) ? 1:0;
-
-  _writeDebug("refreshing cache") if $refresh;
-
   my $cache = Foswiki::Contrib::CacheContrib::getCache("NumberPlugin");
   my $content;
   my $data;
   my $key = $uri->as_string;
-  $content = $cache->get($key) unless $refresh;
+  if ($this->{doRefresh}) {
+    _writeDebug("no cache lookup");
+  } else {
+    #_writeDebug("looking up cache");
+    $content = $cache->get($key);
+  }
 
   if (defined $content) {
-    _writeDebug("found rates in cache $uri");
+    #_writeDebug("found rates in cache $uri");
     $data = $this->json->decode($content);
   } else {
     _writeDebug("fetching rates from $uri");
 
     $this->GET($uri);
     $content = $this->responseContent();
+    #_writeDebug("content=$content");
 
     ## cache only "200 OK" content
-    if ($this->responseCode eq HTTP::Status::RC_OK) {
+    my $code = $this->responseCode();
+    if ($code eq HTTP::Status::RC_OK) {
       $data = $this->json->decode($content);
-      if ($data->{success}) {
+      if (!defined($data->{success}) || $data->{success}) {
+        _writeDebug("caching rates");
         $cache->set($key, $content);
       } else {
         _writeError($data->{error}{info});
-        $data = undef;
       }
+    } else {
+      _writeDebug("got an error code $code");
     }
   }
 

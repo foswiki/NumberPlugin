@@ -1,10 +1,26 @@
-# See bottom of file for license and copyright information
+# Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
+#
+# NumberPlugin is Copyright (C) 2017-2024 Michael Daum http://michaeldaumconsulting.com
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details, published at
+# http://www.gnu.org/copyleft/gpl.html
+
 package Foswiki::Form::Number;
 
 use strict;
 use warnings;
 
 use Foswiki::Func ();
+use Foswiki::Render ();
+use Foswiki::Plugins::JQueryPlugin ();
 use Foswiki::Plugins::NumberPlugin ();
 use Foswiki::Form::Text ();
 use Error qw(:try);
@@ -44,6 +60,11 @@ sub formatter {
   my ($this) = @_;
 
   unless (defined $this->{_formatter}) {
+    my $fraction = $this->param("fraction") // 2;
+    my %params = (
+      minimum_fraction_digits => $fraction,
+      %{$this->param()}  
+    );
     $this->{_formatter} = Foswiki::Plugins::NumberPlugin::getCore()->decimalFormatter(%{$this->param()});
   }
 
@@ -89,38 +110,29 @@ sub renderForDisplay {
 }
 
 sub renderForEdit {
-  my ($this, $topicObject, $value) = @_;
+  my ($this, $meta, $value) = @_;
+
+  my $placeholder = $this->param("placeholder") // $this->{_placehoder};
+  my $fraction = $this->param("fraction") // 2;
+  Foswiki::Plugins::JQueryPlugin::createPlugin("imask");
+
+  my $params = {
+    "type" => "text",
+    "class" => $this->cssClasses("foswikiInputField imask $this->{_class}"),
+    "name" => $this->{name},
+    "size" => $this->{size},
+    "override" => 1,
+    "value" => $value,
+    "data-type" => "number",
+  };
+
+  $params->{"data-scale"} = $fraction;
+  $params->{"placeholder"} = $placeholder if defined $placeholder && $placeholder ne "";
 
   return (
     '',
-    CGI::textfield(
-      -class => $this->cssClasses("foswikiInputField $this->{_class}"),
-      -name => $this->{name},
-      -size => $this->{size},
-      -override => 1,
-      -value => $value,
-      -data_rule_pattern => '^[+\-]?\d+(\.\d+)?$',
-    )
+    Foswiki::Render::html('input', $params)
   );
 }
 
 1;
-__END__
-Foswiki - The Free and Open Source Wiki, http://foswiki.org/
-
-Copyright (C) 2017-2021 Foswiki Contributors. Foswiki Contributors
-are listed in the AUTHORS file in the root of this distribution.
-NOTE: Please extend that file, not this notice.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version. For
-more details read LICENSE in the root of this distribution.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-As per the GPL, removal of this notice is prohibited.
-

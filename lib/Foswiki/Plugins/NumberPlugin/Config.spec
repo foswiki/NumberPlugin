@@ -20,7 +20,7 @@ $Foswiki::cfg{NumberPlugin}{OpenExchangeRates}{Url} = 'https://openexchangerates
 
 # **STRING 50 DISPLAY_IF="{NumberPlugin}{RatesProvider}=='CurrencyLayer'" LABEL="CurrencyLayer Url"**
 # Api endpoint for the CurrencyLayer provider.
-$Foswiki::cfg{NumberPlugin}{CurrencyLayer}{Url} = 'http://www.apilayer.net/api/live';
+$Foswiki::cfg{NumberPlugin}{CurrencyLayer}{Url} = 'https://apilayer.net/api/live';
 
 # **PERL DISPLAY_IF="{NumberPlugin}{RatesProvider}=='FixerIO'" CHECK="undefok" LABEL="Fixer.io Parameter"**
 # Extra api parameter for the Fixer.io provider.

@@ -1,7 +1,8 @@
 Foswiki::Contrib::CacheContrib,>=0,perl,Required
+Foswiki::Contrib::JQIMaskContrib,>0,perl,Required
 Scalar::Util,>=0,cpan,Required
 CLDR::Number,>=0,cpan,Required
-HTTP::Message,>=,cpan,Required
-JSON,>=,cpan,Required
-REST::Client,>=,cpan,Required
-URI,>=,cpan,Required
+HTTP::Message,>=0,cpan,Required
+JSON,>=0,cpan,Required
+REST::Client,>=0,cpan,Required
+URI,>=0,cpan,Required
