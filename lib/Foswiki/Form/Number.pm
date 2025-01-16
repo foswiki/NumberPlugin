@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017-2024 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2025 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -46,14 +46,19 @@ sub finish {
 }
 
 sub param {
-  my ($this, $key) = @_;
+  my ($this, $key, $val) = @_;
 
   unless (defined $this->{_params}) {
     my %params = Foswiki::Func::extractParameters($this->{value});
     $this->{_params} = \%params;
   }
 
-  return (defined $key)?$this->{_params}{$key}:$this->{_params};
+  if (defined $key && defined $val) {
+    $this->{_params}{$key} = $val;
+    return $val;
+  }
+
+  return (defined $key) ? $this->{_params}{$key} : $this->{_params};
 }
 
 sub formatter {
