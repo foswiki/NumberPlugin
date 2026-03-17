@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017-2025 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2026 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -60,7 +60,7 @@ sub new {
 sub getExchange {
   my $this = shift;
 
-  #_writeDebug("called getExchange ...".$this);
+  _writeDebug("called getExchange ... doRefresh=$this->{doRefresh}");
 
   if (!%EXCHANGE || $this->{doRefresh}) {
 
@@ -71,6 +71,7 @@ sub getExchange {
       }
     } else {
       my $uri = new URI($this->{apiUrl});
+      _writeDebug("api url=$uri");
       $uri->query_form($this->{apiParams});
 
       my $data = $this->get($uri);
@@ -91,8 +92,11 @@ sub getExchange {
     # make sure the base is in
     $EXCHANGE{rates}{$EXCHANGE{base}} = 1
       if defined $EXCHANGE{base}; 
+
+    $this->{doRefresh} = 0;
   }
-  #_writeDebug("done getExchange");
+
+  _writeDebug("done getExchange");
 
   return \%EXCHANGE;
 }

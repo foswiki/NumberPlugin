@@ -1,4 +1,4 @@
-Foswiki::Contrib::CacheContrib,>=0,perl,Required
+Foswiki::Contrib::CacheContrib,>=3.00,perl,Required
 Foswiki::Contrib::JQIMaskContrib,>0,perl,Required
 Scalar::Util,>=0,cpan,Required
 CLDR::Number,>=0,cpan,Required

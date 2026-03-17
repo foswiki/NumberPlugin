@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# NumberPlugin is Copyright (C) 2017-2025 Michael Daum http://michaeldaumconsulting.com
+# NumberPlugin is Copyright (C) 2017-2026 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -77,11 +77,16 @@ sub formatter {
 }
 
 sub getDefaultValue {
-    my $this = shift;
+    my ($this, $web, $topic) = @_;
 
     my $value =
       ( exists( $this->{default} ) ? $this->{default} : '' );
     $value = '' unless defined $value;
+
+    if ($value eq "") {
+      $value = Foswiki::Func::decodeFormatTokens($this->param("default") // "");
+      $value = Foswiki::Func::expandCommonVariables($value, $topic, $web) if $value =~ /%/;
+    }
 
     return $value;
 }
