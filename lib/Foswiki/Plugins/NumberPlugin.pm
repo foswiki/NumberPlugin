@@ -23,7 +23,7 @@ use Foswiki::Form ();
 use Error qw(:try);
 use Foswiki::Plugins::NumberPlugin::Core ();
 
-our $VERSION = '7.02';
+our $VERSION = '7.10';
 our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Localized Number Formatter and Currency Converter';
 our $LICENSECODE = '%$LICENSECODE%';

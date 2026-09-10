@@ -68,9 +68,12 @@ sub formatter {
     my $fraction = $this->param("fraction") // 2;
     my %params = (
       minimum_fraction_digits => $fraction,
+      rounding_increment => 10 ** -$fraction,
       %{$this->param()}  
     );
-    $this->{_formatter} = Foswiki::Plugins::NumberPlugin::getCore()->decimalFormatter(%{$this->param()});
+    delete $params{placeholder};
+    delete $params{fraction};
+    $this->{_formatter} = Foswiki::Plugins::NumberPlugin::getCore()->decimalFormatter(%params);
   }
 
   return $this->{_formatter};

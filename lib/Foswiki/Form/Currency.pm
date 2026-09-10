@@ -37,7 +37,15 @@ sub formatter {
   # TODO: provide currecny_code in another formfield
 
   unless (defined $this->{_formatter}) {
-    $this->{_formatter} = Foswiki::Plugins::NumberPlugin::getCore()->currencyFormatter(%{$this->param()});
+    my $fraction = $this->param("fraction") // 2;
+    my %params = (
+      minimum_fraction_digits => $fraction,
+      rounding_increment => 10 ** -$fraction,
+      %{$this->param()}  
+    );
+    delete $params{placeholder};
+    delete $params{fraction};
+    $this->{_formatter} = Foswiki::Plugins::NumberPlugin::getCore()->currencyFormatter(%params);
   }
 
   return $this->{_formatter};

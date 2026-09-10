@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="" date="1773769314" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1789039847" format="1.1" version="1"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -144,6 +144,7 @@ and in https://metacpan.org/pod/CLDR::Number::Format::Percent for "percent" form
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  01 Jul 2026 | fixed rounding of numbers and currencies |
 |  17 Mar 2026 | fixed an infinite loop while refreshing currency rates from an external provider |
 |  15 Jan 2025 | maintenance release |
 |  26 Jan 2024 | add better support for fractions in numerical values; added placeholder parameter for input fields; use !JQIMaskContrib for masked input |
